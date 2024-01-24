@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="doubtchat2.css">
+</head>
+
+<body>
+  <div id="messages">
+
+    <div id="sendMsg">
+      <input type="text" id="msgTxt" placeholder="ENTER YOUR MESSAGE....">
+      <input type="submit" id="msgBtn" value="send" onclick="module.sendMsg()">
+    </div>
+  </div>
+
+  
+</body>
+<script>
+    module = {};
+  </script>
+
+  <script type="module">
+ 
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, remove, onChildAdded, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+ 
+    const firebaseConfig = {
+    apiKey: "AIzaSyCWw24K_U4d9pRVTA-AO8TGUblbOJ6_xVc",
+    authDomain: "doubtchat3.firebaseapp.com",
+    databaseURL: "https://doubtchat3-default-rtdb.firebaseio.com",
+    projectId: "doubtchat3",
+    storageBucket: "doubtchat3.appspot.com",
+    messagingSenderId: "700854568257",
+    appId: "1:700854568257:web:8c7f723c8012f1c87d4dc0"
+  };
+
+  //variables
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+
+    var msgTxt = document.getElementById('msgTxt');
+    var sender;
+    if (sessionStorage.getItem('sender')) {
+      sender = sessionStorage.getItem('sender');
+    } else {
+      sender = prompt('PLEASE ENTER YOUR NAME');
+      sessionStorage.setItem('sender', sender);
+    }
+
+    //to send messages
+    module.sendMsg = function sendMsg() {
+      var msg = msgTxt.value;
+      var timestamp = new Date().getTime();
+      set(ref(db, "messages/" +timestamp), {
+        msg: msg,
+        sender: sender
+      })
+    }
+
+    //TO RECIEVE MESSAGE
+    onChildAdded(ref(db, "messages"), (data) => {
+      if (data.val().sender == sender) {
+        messages.innerHTML += "<div style = justify-content:end  class=outer id = " +data.key+ "><div id = inner class=me>you: "+data.val().msg+"<button id = dltMsg onclick = module.dltMsg(" +data.key+ ")>DELETE</button></div></div>";
+      } else {
+        messages.innerHTML += "<div class=outer id = " +data.key+ "><div id = inner class=notMe>"+data.val().sender +" : "+ data.val().msg + "</div></div>";
+      }
+    })
+
+    //TO DELETE MESSAGE
+
+    module.dltMsg = function dltMsg(key) {
+      remove(ref(db, "messages/" +key));
+    }
+
+    //WHEN MSG IS DELETED
+    onChildRemoved(ref(db, "messages"), (data) => {
+      var msgBox = document.getElementById(data.key);
+      messages.removeChild(msgBox);
+    })
+  </script>
+
+</html>

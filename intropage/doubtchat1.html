@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="doubtchat1.css">
+</head>
+
+<body>
+  <div id="messages">
+
+    <div id="sendMsg">
+      <input type="text" id="msgTxt" placeholder="ENTER YOUR MESSAGE....">
+      <input type="submit" id="msgBtn" value="send" onclick="module.sendMsg()">
+    </div>
+  </div>
+
+  <script>
+    module = {};
+  </script>
+
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, remove, onChildAdded, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBojW_KKxpHupNJFZp9LCNpEL5Dl8ldOnY",
+      authDomain: "doubtchat2.firebaseapp.com",
+      projectId: "doubtchat2",
+      storageBucket: "doubtchat2.appspot.com",
+      messagingSenderId: "312431682748",
+      appId: "1:312431682748:web:59de53f8a70e84bd68dcb9"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    //variables
+    var msgTxt = document.getElementById('msgTxt');
+    var sender;
+    if (sessionStorage.getItem('sender')) {
+      sender = sessionStorage.getItem('sender');
+    } else {
+      sender = prompt('PLEASE ENTER YOUR NAME');
+      sessionStorage.setItem('sender', sender);
+    }
+
+    //to send messages
+    module.sendMsg = function sendMsg() {
+      var msg = msgTxt.value;
+      var timestamp = new Date().getTime();
+      set(ref(db, "messages/" + timestamp), {
+        msg: msg,
+        sender: sender
+      })
+    }
+
+    //TO RECIEVE MESSAGE
+    onChildAdded(ref(db, "messages"), (data) => {
+      if (data.val().sender == sender) {
+        messages.innerHTML += "<div style = justify-content:end  class=outer id = " + data.key + "><div id = inner class=me>you : " + data.val().msg + "<button id = dltMsg onclick = module.dltMsg(" + data.key + ")>DELETE</button></div></div>";
+      } else {
+        messages.innerHTML += "<div class=outer id = " + data.key + "><div id = inner class=notMe>" + data.val().sender +" : "+ data.val().msg + "</div></div>";
+      }
+    })
+
+    //TO DELETE MESSAGE
+
+    module.dltMsg = function dltMsg(key) {
+      remove(ref(db, "messages/" + key));
+    }
+
+    //WHEN MSG IS DELETED
+    onChildRemoved(ref(db, "messages"), (data) => {
+      var msgBox = document.getElementById(data.key);
+      messages.removeChild(msgBox);
+    })
+  </script>
+</body>
+
+</html>

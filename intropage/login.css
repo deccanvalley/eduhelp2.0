@@ -1,0 +1,27 @@
+*{
+    margin:0;
+    padding:0;
+  
+}
+
+body{
+    height:700px;
+    background-image: url("login\ pic3.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    
+}
+
+.login{
+   
+    display:flex;
+    justify-content: center;
+    align-items: center;
+   
+}
+
+#login{
+    color:white;
+    text-decoration: none;
+}
